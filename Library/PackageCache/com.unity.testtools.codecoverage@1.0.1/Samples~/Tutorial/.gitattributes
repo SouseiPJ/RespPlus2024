@@ -1,0 +1,1 @@
+*.{dae,3ds,dxf,max,ma,mb,ttf,otf,a,so,dll,exr,tga,pdf,zip,rns,reason,lxo,rar,tar,gz,lzh,7z,spm,tif,tiff,unitypackage,apk} filter=lfs diff=lfs merge=lfs -text
