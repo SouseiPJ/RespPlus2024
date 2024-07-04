@@ -41,5 +41,4 @@ Packages/manifest.json
 Packages/packages-lock.json
 ProjectSettings/ProjectVersion.txt
 ProjectSettings/boot.config
-ProjectSettings/MultiplayerManager.asset
 UserSettings/Layouts/default-*.dwlt
