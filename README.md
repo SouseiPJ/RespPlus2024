@@ -25,3 +25,12 @@ git lfs install
 ## Let's develop
 
 
+## FAQ
+
+1. Unityエディタのバージョンアップ があるとき
+
+`Library`フォルダを消しておく．
+
+（そうしないとコンパイルエラーでUnityが立ち上がらない）
+
+
