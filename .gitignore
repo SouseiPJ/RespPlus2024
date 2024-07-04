@@ -3,6 +3,8 @@
 /[Oo]bj/
 /[Bb]uild/
 /[Bb]uilds/
+/[Ll]ogs/
+
 # 個人使用のAssetのもの
 /Assets/AssetStoreTools*
 /Assets/Snapcam/Scripts/Editor/Editor Default Resources/SceneSnaps*
