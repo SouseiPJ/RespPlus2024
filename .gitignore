@@ -35,3 +35,9 @@ sysinfo.txt
 
 # Builds
 *.apk
+
+# ...
+Packages/manifest.json
+Packages/packages-lock.json
+ProjectSettings/ProjectVersion.txt
+UserSettings/Layouts/default-2021.dwlt
