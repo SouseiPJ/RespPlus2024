@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq; // Average
 public class MicAudioSource : MonoBehaviour
 {
     // Variables
@@ -52,7 +52,8 @@ public class MicAudioSource : MonoBehaviour
     }
 
     private void MicStart(string device) {
-        if (device.Equals("")) return;
+        if (device.Equals("")) 
+            device = Microphone.devices[0]; //マイクが指定されていなければ、システムを割り当てる
 
         m_MicAudioSource.clip = Microphone.Start(device, true, 1, SAMPLE_RATE);
 

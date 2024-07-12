@@ -37,8 +37,8 @@ sysinfo.txt
 *.apk
 
 # ...
-Packages/manifest.json
-Packages/packages-lock.json
-ProjectSettings/ProjectVersion.txt
-ProjectSettings/boot.config
-UserSettings/Layouts/default-*.dwlt
+manifest.json
+packages-lock.json
+ProjectVersion.txt
+boot.config
+default-*.dwlt
