@@ -1072,6 +1072,9 @@ namespace UnityEngine.UI
 
                     int y2 = y + 1;
 
+                    // Check for zero or negative dimensions to prevent invalid quads (UUM-71372)
+                    if ((s_VertScratch[x2].x - s_VertScratch[x].x <= 0) || (s_VertScratch[y2].y - s_VertScratch[y].y <= 0))
+                        continue;
 
                     AddQuad(toFill,
                         new Vector2(s_VertScratch[x].x, s_VertScratch[y].y),
@@ -1132,7 +1135,7 @@ namespace UnityEngine.UI
             if (tileHeight <= 0)
                 tileHeight = yMax - yMin;
 
-            if (activeSprite != null && (hasBorder || activeSprite.packed || activeSprite.texture.wrapMode != TextureWrapMode.Repeat))
+            if (activeSprite != null && (hasBorder || activeSprite.packed || activeSprite.texture != null && activeSprite.texture.wrapMode != TextureWrapMode.Repeat))
             {
                 // Sprite has border, or is not in repeat mode, or cannot be repeated because of packing.
                 // We cannot use texture tiling so we will generate a mesh of quads to tile the texture.
@@ -1887,6 +1890,7 @@ namespace UnityEngine.UI
         {
             SetMaterialDirty();
             SetVerticesDirty();
+            SetRaycastDirty();
         }
 
 #if UNITY_EDITOR
