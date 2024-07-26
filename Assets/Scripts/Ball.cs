@@ -17,14 +17,29 @@ public class Ball : MonoBehaviour
 
     void Update()
     {
-        // カーソルキーの入力を取得
-        var moveHorizontal = Input.GetAxis("Horizontal");
-        var moveVertical = Input.GetAxis("Vertical");
+        // Wキー（前方移動）
+        if (Input.GetKey(KeyCode.W))
+        {
+            rb.velocity = transform.forward * speed;
+        }
 
-        // カーソルキーの入力に合わせて移動方向を設定
-        var movement = new Vector3(moveHorizontal, 0, moveVertical);
+        // Sキー（後方移動）
+        if (Input.GetKey(KeyCode.S))
+        {
+            rb.velocity = -transform.forward * speed;
+        }
 
-        // Ridigbody に力を与えて玉を動かす
-        rb.AddForce(movement * speed);
+        // Dキー（右移動）
+        if (Input.GetKey(KeyCode.D))
+        {
+            rb.velocity = transform.right * speed;
+        }
+
+        // Aキー（左移動）
+        if (Input.GetKey(KeyCode.A))
+        {
+            rb.velocity = -transform.right * speed;
+        }
     }
+
 }
