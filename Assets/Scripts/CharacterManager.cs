@@ -9,14 +9,16 @@ public class CharacterManager : MonoBehaviour
     public int maxMonsters = 70; // 生成されるモンスターの最大数
 
     private float spawnInterval = 10f; // モンスターが生成される間隔（秒）
-    private DateTime lastSpawnTime; // 最後にモンスターが生成された時刻
-    private const string LastSpawnTimeKey = "LastSpawnTime"; // PlayerPrefsのキー
+    private DateTime StartDatetime;
+    private TimeSpan lastSpawnSpan; // 最後にモンスターが生成された時刻
+    private const string LastSpawnSpanKey = "LastSpawnSpan"; // PlayerPrefsのキー
     private int currentMonsterCount = 0; // 現在のモンスター数
 
     // Start is called before the first frame update
     void Start()
     {
-        LoadLastSpawnTime();
+        StartDatetime = DateTime.Now;
+        LoadLastSpawnSpan();
         CalculateMissedSpawns();
         InvokeRepeating(nameof(SpawnRandomMonster), spawnInterval, spawnInterval);
     }
@@ -32,8 +34,8 @@ public class CharacterManager : MonoBehaviour
         int randomIndex = UnityEngine.Random.Range(0, monsterPrefabs.Count);
         Vector3 randomPosition = GetRandomSpawnPosition();
         Instantiate(monsterPrefabs[randomIndex], randomPosition, Quaternion.identity);
-        lastSpawnTime = DateTime.Now;
-        SaveLastSpawnTime();
+        lastSpawnSpan = DateTime.Now - StartDatetime;
+        SaveLastSpawnSpan();
     }
 
     Vector3 GetRandomSpawnPosition()
@@ -51,27 +53,27 @@ public class CharacterManager : MonoBehaviour
         );
     }
 
-    void SaveLastSpawnTime()
+    void SaveLastSpawnSpan()
     {
-        PlayerPrefs.SetString(LastSpawnTimeKey, lastSpawnTime.ToString());
+        PlayerPrefs.SetString(LastSpawnSpanKey, lastSpawnSpan.ToString());
         PlayerPrefs.Save();
     }
 
-    void LoadLastSpawnTime()
+    void LoadLastSpawnSpan()
     {
-        if (PlayerPrefs.HasKey(LastSpawnTimeKey))
+        if (PlayerPrefs.HasKey(LastSpawnSpanKey))
         {
-            lastSpawnTime = DateTime.Parse(PlayerPrefs.GetString(LastSpawnTimeKey));
+            lastSpawnSpan = TimeSpan.Parse(PlayerPrefs.GetString(LastSpawnSpanKey));
         }
         else
         {
-            lastSpawnTime = DateTime.Now;
+            lastSpawnSpan = DateTime.Now - StartDatetime;
         }
     }
     //CalculateMissedSpawns 最後にモンスターが生成された時間から現在までの経過時間を計算
     void CalculateMissedSpawns()
     {
-        TimeSpan timeElapsed = DateTime.Now - lastSpawnTime;
+        TimeSpan timeElapsed = lastSpawnSpan;
         int missedSpawns = Mathf.FloorToInt((float)timeElapsed.TotalSeconds / spawnInterval);
 
         for (int i = 0; i < missedSpawns; i++)
