@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq; // Average
 using UnityEngine.UI;
+using TMPro; // TextMeshPro
 
 public class MeterController : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class MeterController : MonoBehaviour
     [SerializeField] private string m_MicInDeviceName;
     [SerializeField, Range(10, 300)] private float m_AmpGain = 1;
     [SerializeField] private GameObject m_meter;
+    [SerializeField] private GameObject Vol_object;
+    [SerializeField] private GameObject propeller;
     // - Const
     private const int SAMPLE_RATE = 44100;
     private const float BUFFER_TIME = 0.05f;
@@ -21,6 +24,11 @@ public class MeterController : MonoBehaviour
     private AudioSource m_MicAudioSource;
     private float[] waveSpectrum;
     private float[] waveData;
+
+    // Propeller
+    private float speed = 50f;
+    private float currentSpeed = 30f;
+    private float targetSpeed = 0f;
 
     // Awake
     private void Awake()
@@ -57,6 +65,32 @@ public class MeterController : MonoBehaviour
         float audioLevel = waveData.Average(Mathf.Abs);
         m_meter.GetComponent<Image>().fillAmount = m_AmpGain * audioLevel;
 
+        // 変動する変数に基づいて回転速度を調整
+        targetSpeed = speed + Mathf.Pow(m_AmpGain * audioLevel, 5);
+
+        // 現在の速度を徐々に目標速度に近づける
+        currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 5); // 2は調整可能なスムーズさの係数
+
+        // オブジェクトを回転させる
+        propeller.transform.Rotate(Vector3.forward, currentSpeed * Time.deltaTime);
+
+        // Vol_object の TextMeshProUGUI コンポーネントを更新
+        if (Vol_object != null)
+        {
+            TextMeshProUGUI Vol_text = Vol_object.GetComponent<TextMeshProUGUI>();
+            if (Vol_text != null)
+            {
+                Vol_text.text = Mathf.RoundToInt(currentSpeed).ToString();
+            }
+            else
+            {
+                Debug.LogError("Vol_object does not have a TextMeshProUGUI component.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Vol_object is not assigned.");
+        }
     }
 
     private void MicStart(string device)
