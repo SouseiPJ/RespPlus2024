@@ -12,7 +12,7 @@ public class MeterController : MonoBehaviour
     [SerializeField] private string m_MicInDeviceName;
     [SerializeField, Range(10, 300)] private float m_AmpGain = 1;
     [SerializeField] private GameObject m_meter;
-    [SerializeField] private GameObject Vol_object;
+    // [SerializeField] private GameObject Vol_object;
     [SerializeField] private GameObject propeller;
     [SerializeField] private GameObject RotationCount_object; // 回転数表示用のオブジェクトを追加
     [SerializeField] private GameObject brightnessObject; // 明るさを変更するオブジェクトを追加
@@ -83,22 +83,22 @@ public class MeterController : MonoBehaviour
         rotationCount += currentSpeed * Time.deltaTime / 360f;
 
         // Vol_object の TextMeshProUGUI コンポーネントを更新
-        if (Vol_object != null)
-        {
-            TextMeshProUGUI Vol_text = Vol_object.GetComponent<TextMeshProUGUI>();
-            if (Vol_text != null)
-            {
-                Vol_text.text = Mathf.RoundToInt(currentSpeed).ToString();
-            }
-            else
-            {
-                Debug.LogError("Vol_object does not have a TextMeshProUGUI component.");
-            }
-        }
-        else
-        {
-            Debug.LogError("Vol_object is not assigned.");
-        }
+        //if (Vol_object != null)
+        //{
+            //TextMeshProUGUI Vol_text = Vol_object.GetComponent<TextMeshProUGUI>();
+        //    if (Vol_text != null)
+        //    {
+        //        Vol_text.text = Mathf.RoundToInt(currentSpeed).ToString();
+        //    }
+        //    else
+        //    {
+        //        Debug.LogError("Vol_object does not have a TextMeshProUGUI component.");
+        //    }
+        //}
+        //else
+        //{
+        //    Debug.LogError("Vol_object is not assigned.");
+        //}
 
         // RotationCount_object の TextMeshProUGUI コンポーネントを更新
         if (RotationCount_object != null)
