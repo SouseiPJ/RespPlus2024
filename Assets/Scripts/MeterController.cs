@@ -35,6 +35,12 @@ public class MeterController : MonoBehaviour
     // 回転数をカウントする変数
     private float rotationCount = 0f;
 
+    // 回転数を公開するプロパティを追加
+    public float RotationCount
+    {
+        get { return rotationCount; }
+    }
+
     // Awake
     private void Awake()
     {
@@ -85,7 +91,7 @@ public class MeterController : MonoBehaviour
         // Vol_object の TextMeshProUGUI コンポーネントを更新
         //if (Vol_object != null)
         //{
-            //TextMeshProUGUI Vol_text = Vol_object.GetComponent<TextMeshProUGUI>();
+        //TextMeshProUGUI Vol_text = Vol_object.GetComponent<TextMeshProUGUI>();
         //    if (Vol_text != null)
         //    {
         //        Vol_text.text = Mathf.RoundToInt(currentSpeed).ToString();

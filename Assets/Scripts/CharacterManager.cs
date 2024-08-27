@@ -1,26 +1,66 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro; // TextMeshPro
 
 public class CharacterManager : MonoBehaviour
 {
     public List<GameObject> monsterPrefabs; // モンスターのPrefabをリストで保持
     public Transform spawnArea; // モンスターが生成される範囲（例: 2Dの画面上の位置）
     public int maxMonsters = 70; // 生成されるモンスターの最大数
+    [SerializeField] private float spawnSpan = 100f; // 生成スパン（プロペラの回転数）
 
-    private float spawnInterval = 10f; // モンスターが生成される間隔（秒）
     private DateTime StartDatetime;
     private TimeSpan lastSpawnSpan; // 最後にモンスターが生成された時刻
     private const string LastSpawnSpanKey = "LastSpawnSpan"; // PlayerPrefsのキー
     private int currentMonsterCount = 0; // 現在のモンスター数
 
+    private MeterController meterController; // MeterControllerの参照
+    private float lastRotationCount = 0f; // 最後にチェックした回転数
+
+    [SerializeField] private TextMeshProUGUI totalRotationText; // 累計回転数を表示するTextMeshPro
+    [SerializeField] private TextMeshProUGUI spanRotationText; // 生成スパンごとにリセットされる回転数を表示するTextMeshPro
+
     // Start is called before the first frame update
     void Start()
     {
+        meterController = FindObjectOfType<MeterController>(); // MeterControllerを見つける
+
         StartDatetime = DateTime.Now;
         LoadLastSpawnSpan();
         CalculateMissedSpawns();
-        InvokeRepeating(nameof(SpawnRandomMonster), spawnInterval, spawnInterval);
+    }
+
+    void Update()
+    {
+        if (meterController != null)
+        {
+            float currentRotationCount = meterController.RotationCount;
+            float rotationDifference = currentRotationCount - lastRotationCount;
+
+            // 累計回転数を更新
+            if (totalRotationText != null)
+            {
+                totalRotationText.text = $" {Mathf.FloorToInt(currentRotationCount)}";
+            }
+
+            // 生成スパンごとにリセットされる回転数を更新
+            if (spanRotationText != null)
+            {
+                spanRotationText.text = $" {Mathf.FloorToInt(rotationDifference)}/{spawnSpan}";
+            }
+
+            // 生成スパンごとにモンスターを生成
+            if (rotationDifference >= spawnSpan)
+            {
+                int monstersToSpawn = Mathf.FloorToInt(rotationDifference / spawnSpan);
+                for (int i = 0; i < monstersToSpawn; i++)
+                {
+                    SpawnRandomMonster();
+                }
+                lastRotationCount += monstersToSpawn * spawnSpan; // 生成した分の回転数を加算
+            }
+        }
     }
 
     void SpawnRandomMonster()
@@ -36,6 +76,7 @@ public class CharacterManager : MonoBehaviour
         Instantiate(monsterPrefabs[randomIndex], randomPosition, Quaternion.identity);
         lastSpawnSpan = DateTime.Now - StartDatetime;
         SaveLastSpawnSpan();
+        currentMonsterCount++; // モンスター数を増加
     }
 
     Vector3 GetRandomSpawnPosition()
@@ -70,16 +111,10 @@ public class CharacterManager : MonoBehaviour
             lastSpawnSpan = DateTime.Now - StartDatetime;
         }
     }
-    //CalculateMissedSpawns 最後にモンスターが生成された時間から現在までの経過時間を計算
+
     void CalculateMissedSpawns()
     {
-        TimeSpan timeElapsed = lastSpawnSpan;
-        int missedSpawns = Mathf.FloorToInt((float)timeElapsed.TotalSeconds / spawnInterval);
-
-        for (int i = 0; i < missedSpawns; i++)
-        {
-            SpawnRandomMonster();
-        }
+        // このメソッドは現在の文脈では不要です
     }
 
     public void OnMonsterDestroyed()
@@ -87,5 +122,4 @@ public class CharacterManager : MonoBehaviour
         currentMonsterCount--;
         currentMonsterCount = Mathf.Max(currentMonsterCount, 0); // カウントが負になるのを防ぐ
     }
-
 }
