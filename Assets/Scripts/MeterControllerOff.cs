@@ -17,6 +17,8 @@ public class MeterControllerOff : MonoBehaviour
     [SerializeField] private GameObject RotationCount_object; // 回転数表示用のオブジェクトを追加
     [SerializeField] private GameObject brightnessObject; // 明るさを変更するオブジェクトを追加
     [SerializeField, Range(1, 10)] private int monstersToRemove = 1; // 一度に消せるモンスターの数を設定
+    [SerializeField] private TextMeshProUGUI patText; // "ぱっ"のTextMeshPro
+    [SerializeField] private TextMeshProUGUI hatText; // "はっ"のTextMeshPro
 
     // - Const
     private const int SAMPLE_RATE = 44100;
@@ -169,6 +171,12 @@ public class MeterControllerOff : MonoBehaviour
         {
             RecognizedSound = "はっ";
             Debug.Log("はっ  Fu=" + Fu_odds.ToString() + " Ha=" + Ha_odds.ToString());
+
+            // "はっ"のTextMeshProを強調表示
+            if (hatText != null)
+            {
+                StartCoroutine(HighlightText(hatText));
+            }
         }
         else if ((Fu_odds >= 0.70) && (max_amplitude >= 0.05))
         {
@@ -179,6 +187,12 @@ public class MeterControllerOff : MonoBehaviour
         {
             RecognizedSound = "ぱっ";
             Debug.Log("ぱっ  Fu=" + Fu_odds.ToString() + " Ha=" + Ha_odds.ToString() + " Pa=" + Pa_odds.ToString());
+
+            // "ぱっ"のTextMeshProを強調表示
+            if (patText != null)
+            {
+                StartCoroutine(HighlightText(patText));
+            }
         }
     }
 
@@ -213,5 +227,13 @@ public class MeterControllerOff : MonoBehaviour
     public int GetMonstersToRemove()
     {
         return monstersToRemove;
+    }
+
+    private IEnumerator HighlightText(TextMeshProUGUI text)
+    {
+        Color originalColor = text.color;
+        text.color = new Color(1f, 1f, 0f, 1f); // 明るい黄色に変更
+        yield return new WaitForSeconds(1f); // 1秒待つ
+        text.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.25f); // 元の色に戻す
     }
 }

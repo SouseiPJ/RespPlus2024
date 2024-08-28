@@ -225,7 +225,7 @@ public class CharacterManager : MonoBehaviour
     {
         float duration = 0.5f; // アニメーションの持続時間
         Vector3 initialScale = Vector3.zero;
-        Vector3 finalScale = new Vector3(0.3f, 0.3f, 0.3f); // 元の大きさ0.3倍
+        Vector3 finalScale = new Vector3(20f, 20f, 20f); // 元の大きさの20倍
 
         float elapsedTime = 0f;
         while (elapsedTime < duration)
@@ -241,15 +241,27 @@ public class CharacterManager : MonoBehaviour
     {
         float duration = 1.0f; // アニメーションの持続時間
         Vector3 initialPosition = monster.transform.position;
-        Vector3 finalPosition = initialPosition + Vector3.up * 5f; // 上に移動
+        Vector3 finalPosition = initialPosition + Vector3.up * 50f; // 上に移動
 
         float elapsedTime = 0f;
+        Renderer renderer = monster.GetComponent<Renderer>();
+        Color initialColor = renderer.material.color;
+
         while (elapsedTime < duration)
         {
+            // 位置を移動
             monster.transform.position = Vector3.Lerp(initialPosition, finalPosition, elapsedTime / duration);
+
+            // アルファ値を変更して徐々に透明にする
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / duration);
+            renderer.material.color = new Color(initialColor.r, initialColor.g, initialColor.b, alpha);
+
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+
+        // 最後に完全に透明にする
+        renderer.material.color = new Color(initialColor.r, initialColor.g, initialColor.b, 0f);
         Destroy(monster);
     }
 
@@ -260,7 +272,7 @@ public class CharacterManager : MonoBehaviour
             monsterCountText.text = "";
             foreach (var kvp in collectedMonsterCounts)
             {
-                monsterCountText.text += $"{kvp.Key}: {kvp.Value}\n";
+                monsterCountText.text += $"{kvp.Key}: {kvp.Value}";
             }
         }
     }
