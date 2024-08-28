@@ -159,4 +159,14 @@ public class MeterController : MonoBehaviour
 
         m_MicAudioSource.Play();
     }
+
+    public void ResetMic()
+    {
+        if (m_MicAudioSource.isPlaying)
+        {
+            m_MicAudioSource.Stop();
+            Microphone.End(m_MicInDeviceName);
+        }
+        MicStart(m_MicInDeviceName);
+    }
 }

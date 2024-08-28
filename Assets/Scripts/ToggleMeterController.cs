@@ -74,6 +74,17 @@ public class ToggleMeterController : MonoBehaviour, IPointerClickHandler, IPoint
         bool isMeterControllerActive = value <= 0.5f;
         meterController.enabled = isMeterControllerActive;
         meterControllerOff.enabled = !isMeterControllerActive;
+
+        // マイクをリセット
+        if (isMeterControllerActive)
+        {
+            meterController.ResetMic();
+        }
+        else
+        {
+            meterControllerOff.ResetMic();
+        }
+
         UpdateSliderColor();
         UpdateBackgroundColor();
         UpdateStatusText(); // 追加: スライダーの状態に応じてテキストを更新
