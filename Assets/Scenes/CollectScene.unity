@@ -4083,7 +4083,7 @@ MonoBehaviour:
   propeller: {fileID: 1554822151}
   RotationCount_object: {fileID: 0}
   brightnessObject: {fileID: 153261320}
-  monstersToRemove: 1
+  monstersToRemove: 5
   patText: {fileID: 1841812522}
   hatText: {fileID: 2139486653}
 --- !u!82 &2047271890

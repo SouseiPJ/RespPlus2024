@@ -56,6 +56,9 @@ public class MeterControllerOff : MonoBehaviour
     // 音声識別結果を保持するプロパティ
     public string RecognizedSound { get; private set; }
 
+    // クールタイムを管理する変数
+    private bool isCooldown = false;
+
     // Awake
     private void Awake()
     {
@@ -82,7 +85,7 @@ public class MeterControllerOff : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!m_MicAudioSource.isPlaying)
+        if (!m_MicAudioSource.isPlaying || isCooldown)
             return;
 
         waveData = new float[BUFFER_SIZE];
@@ -177,6 +180,9 @@ public class MeterControllerOff : MonoBehaviour
             {
                 StartCoroutine(HighlightText(hatText));
             }
+
+            // クールタイムを開始
+            StartCoroutine(CooldownCoroutine());
         }
         else if ((Pa_odds >= 0.70) && (max_amplitude >= 0.05)) // 閾値を0.70に変更
         {
@@ -188,6 +194,9 @@ public class MeterControllerOff : MonoBehaviour
             {
                 StartCoroutine(HighlightText(patText));
             }
+
+            // クールタイムを開始
+            StartCoroutine(CooldownCoroutine());
         }
     }
 
@@ -230,5 +239,12 @@ public class MeterControllerOff : MonoBehaviour
         text.color = new Color(1f, 1f, 0f, 1f); // 明るい黄色に変更
         yield return new WaitForSeconds(1f); // 1秒待つ
         text.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.25f); // 元の色に戻す
+    }
+
+    private IEnumerator CooldownCoroutine()
+    {
+        isCooldown = true;
+        yield return new WaitForSeconds(2f); // 2秒間のクールタイム
+        isCooldown = false;
     }
 }
