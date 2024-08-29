@@ -178,12 +178,7 @@ public class MeterControllerOff : MonoBehaviour
                 StartCoroutine(HighlightText(hatText));
             }
         }
-        else if ((Fu_odds >= 0.70) && (max_amplitude >= 0.05))
-        {
-            RecognizedSound = "ふー";
-            Debug.Log("ふー  Fu=" + Fu_odds.ToString() + " Ha=" + Ha_odds.ToString());
-        }
-        else if ((Pa_odds >= 0.80) && (max_amplitude >= 0.05))
+        else if ((Pa_odds >= 0.70) && (max_amplitude >= 0.05)) // 閾値を0.70に変更
         {
             RecognizedSound = "ぱっ";
             Debug.Log("ぱっ  Fu=" + Fu_odds.ToString() + " Ha=" + Ha_odds.ToString() + " Pa=" + Pa_odds.ToString());

@@ -153,7 +153,7 @@ public class ToggleMeterController : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (statusText != null)
         {
-            statusText.text = _currentValue ? "Collect" : "Generate";
+            statusText.text = _currentValue ? "ïﬂ äl" : "è¢ ä´";
         }
     }
 }

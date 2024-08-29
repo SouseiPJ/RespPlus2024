@@ -6,7 +6,7 @@ using TMPro; // TextMeshPro
 
 public class CharacterManager : MonoBehaviour
 {
-    public List<GameObject> monsterPrefabs; // モンスターのPrefabをリストで保持
+    public List<GameObject> monsterPrefabs; // 統一されたモンスターのPrefabリスト
     public Transform spawnArea; // モンスターが生成される範囲（例: 2Dの画面上の位置）
     public int maxMonsters = 70; // 生成されるモンスターの最大数
     [SerializeField] private float spawnSpan = 100f; // 生成スパン（プロペラの回転数）
@@ -31,25 +31,31 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI collectedMonsterText; // 回収したモンスターの数を表示するTextMeshPro
     [SerializeField] private TextMeshProUGUI monsterCountText; // モンスターの種類ごとのカウントを表示するTextMeshPro
 
-    // モンスターごとのTextMeshProの参照を保持する辞書
     private Dictionary<string, TextMeshProUGUI> collectedMonsterTexts = new Dictionary<string, TextMeshProUGUI>();
 
-    // Start is called before the first frame update
+    private Announce announce; // Announceクラスの参照
+
     void Start()
     {
-        meterController = FindObjectOfType<MeterController>(); // MeterControllerを見つける
-        meterControllerOff = FindObjectOfType<MeterControllerOff>(); // MeterControllerOffを見つける
+        meterController = FindObjectOfType<MeterController>();
+        meterControllerOff = FindObjectOfType<MeterControllerOff>();
+        announce = FindObjectOfType<Announce>(); // Announceクラスを見つける
 
         StartDatetime = DateTime.Now;
         LoadLastSpawnSpan();
         CalculateMissedSpawns();
 
-        // 各モンスターの種類ごとにTextMeshProの参照を設定
         foreach (var prefab in monsterPrefabs)
         {
             string monsterType = prefab.name;
             TextMeshProUGUI textMeshPro = GameObject.Find($"{monsterType}CollectedText").GetComponent<TextMeshProUGUI>();
             collectedMonsterTexts[monsterType] = textMeshPro;
+        }
+
+        // 初期化コードを追加
+        if (monsterCountText != null)
+        {
+            monsterCountText.text = "0\n0\n0";
         }
     }
 
@@ -60,19 +66,16 @@ public class CharacterManager : MonoBehaviour
             float currentRotationCount = meterController.RotationCount;
             float rotationDifference = currentRotationCount - lastRotationCount;
 
-            // 累計回転数を更新
             if (totalRotationText != null)
             {
                 totalRotationText.text = $" {Mathf.FloorToInt(currentRotationCount)}";
             }
 
-            // 生成スパンごとにリセットされる回転数を更新
             if (spanRotationText != null)
             {
                 spanRotationText.text = $" {Mathf.FloorToInt(rotationDifference)}/{spawnSpan}";
             }
 
-            // 生成スパンごとにモンスターを生成
             if (rotationDifference >= spawnSpan)
             {
                 int monstersToSpawn = Mathf.FloorToInt(rotationDifference / spawnSpan);
@@ -80,25 +83,23 @@ public class CharacterManager : MonoBehaviour
                 {
                     SpawnRandomMonster();
                 }
-                lastRotationCount += monstersToSpawn * spawnSpan; // 生成した分の回転数を加算
+                lastRotationCount += monstersToSpawn * spawnSpan;
             }
         }
 
-        // 音声識別によるモンスターの回収
         if (meterControllerOff != null)
         {
-            if (meterControllerOff.RecognizedSound == "はっ" || meterControllerOff.RecognizedSound == "ぱっ")
+            if (meterControllerOff.RecognizedSound == "はっ")
             {
-                int monstersToRemove = meterControllerOff.GetMonstersToRemove();
-                for (int i = 0; i < monstersToRemove; i++)
-                {
-                    CollectMonster();
-                }
-                meterControllerOff.ClearRecognizedSound(); // 認識された音をクリア
+                CollectMonstersWithTag("HaMonster");
             }
+            else if (meterControllerOff.RecognizedSound == "ぱっ")
+            {
+                CollectMonstersWithTag("PaMonster");
+            }
+            meterControllerOff.ClearRecognizedSound();
         }
 
-        // モンスターの種類ごとのカウントを更新
         UpdateMonsterCountText();
     }
 
@@ -107,73 +108,90 @@ public class CharacterManager : MonoBehaviour
         if (currentMonsterCount >= maxMonsters)
         {
             Debug.Log("モンスターの最大数に達しています。");
+            announce.AddMessage("モンスターの数がいっぱいだよ！捕獲しよう！", new Color(0.6f, 0.4f, 0.4f));
             return;
         }
 
         int randomIndex = UnityEngine.Random.Range(0, monsterPrefabs.Count);
         Vector3 randomPosition = GetRandomSpawnPosition();
         GameObject monster = Instantiate(monsterPrefabs[randomIndex], randomPosition, Quaternion.identity);
-        monster.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f); // スケールを(0.3, 0.3, 0.3)に設定
-        spawnedMonsters.Add(monster); // 生成されたモンスターをリストに追加
 
-        // モンスターの種類ごとのカウントを更新
-        string monsterType = monsterPrefabs[randomIndex].name;
+        monster.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+        spawnedMonsters.Add(monster);
+
+        string monsterType = monster.name.Replace("(Clone)", "").Trim();
         if (!monsterCounts.ContainsKey(monsterType))
         {
             monsterCounts[monsterType] = 0;
         }
         monsterCounts[monsterType]++;
 
-        // 生成アニメーションを再生
+        monster.AddComponent<RandomMovement>();
         StartCoroutine(PlaySpawnAnimation(monster));
 
         lastSpawnSpan = DateTime.Now - StartDatetime;
         SaveLastSpawnSpan();
-        currentMonsterCount++; // モンスター数を増加
+        currentMonsterCount++;
     }
 
-    void CollectMonster()
+    void CollectMonstersWithTag(string tag)
     {
-        if (currentMonsterCount > 0 && spawnedMonsters.Count > 0)
+        int monstersToRemove = meterControllerOff.GetMonstersToRemove();
+        for (int i = 0; i < monstersToRemove; i++)
         {
-            GameObject monsterToRemove = spawnedMonsters[0];
-            spawnedMonsters.RemoveAt(0); // リストから削除
-
-            // モンスターの種類ごとのカウントを更新
-            string monsterType = monsterToRemove.name.Replace("(Clone)", "").Trim();
-            if (monsterCounts.ContainsKey(monsterType))
+            GameObject monsterToRemove = spawnedMonsters.Find(monster => monster.CompareTag(tag));
+            if (monsterToRemove != null)
             {
-                monsterCounts[monsterType]--;
-                if (!collectedMonsterCounts.ContainsKey(monsterType))
+                spawnedMonsters.Remove(monsterToRemove);
+
+                string monsterType = monsterToRemove.name.Replace("(Clone)", "").Trim();
+                if (monsterCounts.ContainsKey(monsterType))
                 {
-                    collectedMonsterCounts[monsterType] = 0;
+                    monsterCounts[monsterType]--;
+                    if (!collectedMonsterCounts.ContainsKey(monsterType))
+                    {
+                        collectedMonsterCounts[monsterType] = 0;
+                    }
+                    collectedMonsterCounts[monsterType]++;
                 }
-                collectedMonsterCounts[monsterType]++;
+
+                StartCoroutine(PlayCollectAnimation(monsterToRemove));
+
+                currentMonsterCount--;
+                collectedMonsterCount++;
+
+                if (collectedMonsterText != null)
+                {
+                    collectedMonsterText.text = $" {collectedMonsterCount}";
+                }
+
+                if (collectedMonsterTexts.ContainsKey(monsterType))
+                {
+                    collectedMonsterTexts[monsterType].text = $"{monsterType}: {collectedMonsterCounts[monsterType]}";
+                }
+
+                Debug.Log("モンスターを回収しました。");
+
+                // Announceにメッセージを送信
+                if (announce != null)
+                {
+                    announce.AddMessage("モンスターを捕獲！！！やったね！！！", new Color(0.4f, 0.6f, 0.4f)); // くすんだ緑色
+                }
             }
-
-            // 回収アニメーションを再生
-            StartCoroutine(PlayCollectAnimation(monsterToRemove));
-
-            currentMonsterCount--; // モンスター数を減少
-            collectedMonsterCount++; // 回収したモンスター数を増加
-
-            // 回収したモンスターの数を更新
-            if (collectedMonsterText != null)
+            else
             {
-                collectedMonsterText.text = $" {collectedMonsterCount}";
+                bool otherTagMonstersExist = spawnedMonsters.Exists(monster => monster.CompareTag(tag == "PaMonster" ? "HaMonster" : "PaMonster"));
+                if (otherTagMonstersExist)
+                {
+                    string otherTagMessage = tag == "PaMonster" ? "はっと息を吹きかけて残りのモンスターを捕獲しよう！" : "ぱっと息を吹きかけて残りのモンスターを捕獲しよう！";
+                    announce.AddMessage(otherTagMessage, new Color(0.6f, 0.4f, 0.4f)); // くすんだ赤色
+                }
+                else
+                {
+                    Debug.Log("回収するモンスターがいません。");
+                    announce.AddMessage("捕獲できるモンスターはいないよ！召喚しよう！", new Color(0.6f, 0.4f, 0.4f)); // くすんだ赤色
+                }
             }
-
-            // モンスターごとのTextMeshProを更新
-            if (collectedMonsterTexts.ContainsKey(monsterType))
-            {
-                collectedMonsterTexts[monsterType].text = $"{monsterType}: {collectedMonsterCounts[monsterType]}";
-            }
-
-            Debug.Log("モンスターを回収しました。");
-        }
-        else
-        {
-            Debug.Log("回収するモンスターがいません。");
         }
     }
 
@@ -225,7 +243,7 @@ public class CharacterManager : MonoBehaviour
     {
         float duration = 0.5f; // アニメーションの持続時間
         Vector3 initialScale = Vector3.zero;
-        Vector3 finalScale = new Vector3(20f, 20f, 20f); // 元の大きさの20倍
+        Vector3 finalScale = new Vector3(10f, 10f, 10f); // 元の大きさの10倍
 
         float elapsedTime = 0f;
         while (elapsedTime < duration)
@@ -272,7 +290,7 @@ public class CharacterManager : MonoBehaviour
             monsterCountText.text = "";
             foreach (var kvp in collectedMonsterCounts)
             {
-                monsterCountText.text += $"{kvp.Key}: {kvp.Value}";
+                monsterCountText.text += $"{kvp.Value}\n";
             }
         }
     }
