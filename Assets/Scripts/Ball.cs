@@ -20,25 +20,25 @@ public class Ball : MonoBehaviour
         // W�L�[�i�O���ړ��j
         if (Input.GetKey(KeyCode.W))
         {
-            rb.linearVelocity = transform.forward * speed;
+            rb.velocity = transform.forward * speed;
         }
 
         // S�L�[�i����ړ��j
         if (Input.GetKey(KeyCode.S))
         {
-            rb.linearVelocity = -transform.forward * speed;
+            rb.velocity = -transform.forward * speed;
         }
 
         // D�L�[�i�E�ړ��j
         if (Input.GetKey(KeyCode.D))
         {
-            rb.linearVelocity = transform.right * speed;
+            rb.velocity = transform.right * speed;
         }
 
         // A�L�[�i���ړ��j
         if (Input.GetKey(KeyCode.A))
         {
-            rb.linearVelocity = -transform.right * speed;
+            rb.velocity = -transform.right * speed;
         }
     }
 
