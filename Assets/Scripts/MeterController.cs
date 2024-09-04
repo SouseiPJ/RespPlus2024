@@ -15,7 +15,7 @@ public class MeterController : MonoBehaviour
     // [SerializeField] private GameObject Vol_object;
     [SerializeField] private GameObject propeller;
     [SerializeField] private GameObject RotationCount_object; // 回転数表示用のオブジェクトを追加
-    [SerializeField] private GameObject brightnessObject; // 明るさを変更するオブジェクトを追加
+    [SerializeField] private GameObject parentObject; // 親オブジェクトを追加
     // - Const
     private const int SAMPLE_RATE = 44100;
     private const float BUFFER_TIME = 0.05f;
@@ -124,26 +124,29 @@ public class MeterController : MonoBehaviour
             Debug.LogError("RotationCount_object is not assigned.");
         }
 
-        // 明るさを変更するオブジェクトの Renderer コンポーネントを取得
-        if (brightnessObject != null)
+        if (parentObject != null)
         {
-            Renderer renderer = brightnessObject.GetComponent<Renderer>();
-            if (renderer != null)
+            // 親オブジェクトの全ての子オブジェクトを取得
+            foreach (Transform child in parentObject.transform)
             {
-                // 回転速度に基づいて明るさを調整
-                float brightness = Mathf.Clamp01(currentSpeed / 100f); // 0から1の範囲にクランプ
-                Color color = renderer.material.color;
-                color.a = brightness; // アルファ値を変更して明るさを調整
-                renderer.material.color = color;
-            }
-            else
-            {
-                Debug.LogError("brightnessObject does not have a Renderer component.");
+                Renderer renderer = child.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    // 回転速度に基づいて明るさを調整
+                    float brightness = Mathf.Clamp01(currentSpeed / 100f); // 0から1の範囲にクランプ
+                    Color color = renderer.material.color;
+                    color.a = brightness; // アルファ値を変更して明るさを調整
+                    renderer.material.color = color;
+                }
+                else
+                {
+                    Debug.LogError($"{child.name} does not have a Renderer component.");
+                }
             }
         }
         else
         {
-            Debug.LogError("brightnessObject is not assigned.");
+            Debug.LogError("parentObject is not assigned.");
         }
     }
 
