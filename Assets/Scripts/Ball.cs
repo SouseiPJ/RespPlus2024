@@ -5,40 +5,40 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
 
-    public float speed = 20; // “®‚­‘¬‚³
+    public float speed = 20; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     private Rigidbody rb; // Rididbody
 
     void Start()
     {
-        // Rigidbody ‚ğæ“¾
+        // Rigidbody ï¿½ï¿½ï¿½æ“¾
         rb = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
-        // WƒL[i‘O•ûˆÚ“®j
+        // Wï¿½Lï¿½[ï¿½iï¿½Oï¿½ï¿½ï¿½Ú“ï¿½ï¿½j
         if (Input.GetKey(KeyCode.W))
         {
-            rb.velocity = transform.forward * speed;
+            rb.linearVelocity = transform.forward * speed;
         }
 
-        // SƒL[iŒã•ûˆÚ“®j
+        // Sï¿½Lï¿½[ï¿½iï¿½ï¿½ï¿½ï¿½Ú“ï¿½ï¿½j
         if (Input.GetKey(KeyCode.S))
         {
-            rb.velocity = -transform.forward * speed;
+            rb.linearVelocity = -transform.forward * speed;
         }
 
-        // DƒL[i‰EˆÚ“®j
+        // Dï¿½Lï¿½[ï¿½iï¿½Eï¿½Ú“ï¿½ï¿½j
         if (Input.GetKey(KeyCode.D))
         {
-            rb.velocity = transform.right * speed;
+            rb.linearVelocity = transform.right * speed;
         }
 
-        // AƒL[i¶ˆÚ“®j
+        // Aï¿½Lï¿½[ï¿½iï¿½ï¿½ï¿½Ú“ï¿½ï¿½j
         if (Input.GetKey(KeyCode.A))
         {
-            rb.velocity = -transform.right * speed;
+            rb.linearVelocity = -transform.right * speed;
         }
     }
 
