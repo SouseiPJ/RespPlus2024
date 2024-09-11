@@ -35,6 +35,11 @@ public class CharacterManager : MonoBehaviour
 
     private Announce announce; // Announceクラスの参照
 
+    void Awake()
+    {
+        Debug.Log("CharacterManager script loaded");
+    }
+
     void Start()
     {
         meterController = FindObjectOfType<MeterController>();
@@ -55,9 +60,20 @@ public class CharacterManager : MonoBehaviour
         // 初期化コードを追加
         if (monsterCountText != null)
         {
-            monsterCountText.text = "0\n0\n0";
+            // モンスターの種類分の0を縦に表示
+            string initialText = "";
+            foreach (var prefab in monsterPrefabs)
+            {
+                initialText += "0\n";
+            }
+            monsterCountText.text = initialText.TrimEnd('\n'); // 最後の改行を削除
         }
+
+        // 初期値を設定
+        UpdateMonsterCountText();
     }
+
+
 
     void Update()
     {
@@ -288,9 +304,11 @@ public class CharacterManager : MonoBehaviour
         if (monsterCountText != null)
         {
             monsterCountText.text = "";
-            foreach (var kvp in collectedMonsterCounts)
+            foreach (var prefab in monsterPrefabs)
             {
-                monsterCountText.text += $"{kvp.Value}\n";
+                string monsterType = prefab.name;
+                int count = collectedMonsterCounts.ContainsKey(monsterType) ? collectedMonsterCounts[monsterType] : 0;
+                monsterCountText.text += $"{count}\n";
             }
         }
     }
