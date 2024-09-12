@@ -1,14 +1,16 @@
+// -*- coding: utf-8 -*-
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MovingController : MonoBehaviour
 {
-    public float jumpForce = 5f;  // ƒWƒƒƒ“ƒv—Í
-    public float moveForwardForce = 2f;  // ‘Oi‚·‚é—Í
+    public float jumpForce = 5f;  // ã‚¸ãƒ£ãƒ³ãƒ—åŠ›
+    public float moveForwardForce = 2f;  // å‰é€²ã™ã‚‹åŠ›
 
     private Rigidbody2D rb;
-    private bool isGrounded = true;  // ƒQ[ƒ€ŠJn‚É’n–Ê‚É‚¢‚éê‡
+    private bool isGrounded = true;  // ã‚²ãƒ¼ãƒ é–‹å§‹æ™‚ã«åœ°é¢ã«ã„ã‚‹å ´åˆ
 
     [SerializeField] private string m_MicInDeviceName;
     private AudioSource m_MicAudioSource;
@@ -17,22 +19,24 @@ public class MovingController : MonoBehaviour
     // - Const
     private const int SAMPLE_RATE = 44100;
     private const float BUFFER_TIME = 0.05f;
-    private int BUFFER_SIZE = Mathf.CeilToInt(SAMPLE_RATE * BUFFER_TIME);
 
-    private int Q = (int)Mathf.Pow(2.0f,Mathf.FloorToInt(Mathf.Log(SAMPLE_RATE * BUFFER_TIME)/Mathf.Log(2.0f)));
+//  LenFFT: Fs*LenFrameã‚’2ã®ã¹ãä¹—ã«ä¸¸ã‚ãŸç‚¹æ•°
+    private int LenFFT = (int)Mathf.Pow(2.0f, Mathf.FloorToInt(Mathf.Log(SAMPLE_RATE * BUFFER_TIME) / Mathf.Log(2.0f)));
 
     private void Awake()
     {
-        // ‰¹Œ¹ƒnƒ“ƒhƒ‰
+        // éŸ³æºãƒãƒ³ãƒ‰ãƒ©
         m_MicAudioSource = GetComponent<AudioSource>();
     }
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         string targetDevice = "";
-        foreach (var device in Microphone.devices) {
+        foreach (var device in Microphone.devices)
+        {
             Debug.Log($"Device Name: {device}");
-            if (device.Equals(m_MicInDeviceName)) {
+            if (device.Equals(m_MicInDeviceName))
+            {
                 targetDevice = device;
             }
         }
@@ -48,30 +52,31 @@ public class MovingController : MonoBehaviour
             return;
 
         // Spectrum devided to {Low,Mid,High}-range SPL
-        waveSpectrum = new float[Q];
+        waveSpectrum = new float[LenFFT];
         m_MicAudioSource.GetSpectrumData(waveSpectrum, 0, FFTWindow.Hamming);
 
         float lowFreqLevel = 0.0f;
         float highFreqLevel = 0.0f;
-        for(var i=0;i<Q;i++){
+        for (var i = 0; i < LenFFT; i++)
+        {
             var sumSpectra = Mathf.Abs(waveSpectrum[i]);
-            if(i < Q/2)
+            if (i < LenFFT / 2)
                 lowFreqLevel += sumSpectra;
             else
                 highFreqLevel += sumSpectra;
         }
 
-        // ‚¢‚Â‚Å‚àƒWƒƒƒ“ƒv‘Oi‚µ‚Ä‚µ‚Ü‚¤‚Ì‚ÅC‰¹—Ê‚Ì‚µ‚«‚¢’l‚È‚Ç‚ğ‚Â‚¯‚æ‚¤D
-        
+        // ã„ã¤ã§ã‚‚ã‚¸ãƒ£ãƒ³ãƒ—å‰é€²ã—ã¦ã—ã¾ã†ã®ã§ï¼ŒéŸ³é‡ã®ã—ãã„å€¤ãªã©ã‚’ã¤ã‘ã‚ˆã†ï¼
+
         moveForwardForce = m_AmpGain * lowFreqLevel;
         jumpForce = m_AmpGain * highFreqLevel;
 
         rb.velocity = new Vector2(moveForwardForce, jumpForce);
 
-        // // ƒXƒy[ƒXƒL[‚ª‰Ÿ‚³‚ê‚½‚çƒWƒƒƒ“ƒvˆ—
+        // // ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‚‰ã‚¸ãƒ£ãƒ³ãƒ—å‡¦ç†
         // if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         // {
-        //     Debug.Log("ƒWƒƒƒ“ƒvI");
+        //     Debug.Log("ã‚¸ãƒ£ãƒ³ãƒ—ï¼");
         //     rb.velocity = new Vector2(moveForwardForce, jumpForce);
         //     isGrounded = false;
         // }
@@ -81,18 +86,19 @@ public class MovingController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            Debug.Log("’n–Ê‚É’…’nI");
+            Debug.Log("åœ°é¢ã«ç€åœ°ï¼");
             isGrounded = true;
         }
     }
 
-    private void MicStart(string device) {
+    private void MicStart(string device)
+    {
         if (device.Equals(""))
-            device = Microphone.devices[0]; //ƒ}ƒCƒN‚ªw’è‚³‚ê‚Ä‚¢‚È‚¯‚ê‚ÎAƒVƒXƒeƒ€‚ğŠ„‚è“–‚Ä‚é
+            device = Microphone.devices[0]; //ãƒã‚¤ã‚¯ãŒæŒ‡å®šã•ã‚Œã¦ã„ãªã‘ã‚Œã°ã€ã‚·ã‚¹ãƒ†ãƒ ã‚’å‰²ã‚Šå½“ã¦ã‚‹
 
         m_MicAudioSource.clip = Microphone.Start(device, true, 1, SAMPLE_RATE);
 
-        //ƒ}ƒCƒNƒfƒoƒCƒX‚Ì€”õ‚ª‚Å‚«‚é‚Ü‚Å‘Ò‚Â
+        //ãƒã‚¤ã‚¯ãƒ‡ãƒã‚¤ã‚¹ã®æº–å‚™ãŒã§ãã‚‹ã¾ã§å¾…ã¤
         while (!(Microphone.GetPosition("") > 0)) { }
 
         m_MicAudioSource.Play();
