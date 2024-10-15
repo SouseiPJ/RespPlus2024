@@ -29,6 +29,7 @@ ExportedObj/
 
 # Unity3D generated meta files
 *.pidb.meta
+*.meta
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
@@ -42,3 +43,4 @@ packages-lock.json
 ProjectVersion.txt
 boot.config
 default-*.dwlt
+.DS_Store

@@ -150,7 +150,8 @@ public class MeterControllerOff : MonoBehaviour
         }
 
         // ‰¹º¯•Êˆ—
-        var spectrum = m_MicAudioSource.GetSpectrumData(samplingRange, 0, FFTWindow.Hamming);
+        var spectrum = new float[samplingRange];
+        m_MicAudioSource.GetSpectrumData(spectrum, 0, FFTWindow.Hamming);
         double Fu_euclid = 0;
         double Ha_euclid = 0;
         double Pa_euclid = 0;
