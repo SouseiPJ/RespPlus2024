@@ -62,7 +62,7 @@ public class MovingController : MonoBehaviour
         float audioLevel = waveData.Average(Mathf.Abs);
 
         float Level = m_AmpGain * audioLevel;
-        if(Level > 0.7f) // 音量が0.7より大きければscale計算
+        if (Level > 0.7f) // 音量が0.7より大きければscale計算
         {
 
             AMDF = new float[LenFFT];
@@ -71,14 +71,17 @@ public class MovingController : MonoBehaviour
             ToneHeights toneHeights = new ToneHeights();
 
             AMDF = toneHeights.getAMDF(waveData, LenFFT);
-            for(int i=0;i<LenFFT;i++)
+            for (int i = 0; i < LenFFT; i++)
                 //File.AppendAllText(@"amdf.txt",$"{AMDF[i]}\n");
                 //Debug.Log($"AMDF[{i}]:{AMDF[i]}");
-            y = toneHeights.YIN(AMDF,LenFFT,0.3);
+                y = toneHeights.YIN(AMDF, LenFFT, 0.3);
             double clarity = y[1];
-            if(clarity>0){
+            if (clarity > 0)
+            {
                 pitch = SAMPLE_RATE * (float)y[0];
-            }else{
+            }
+            else
+            {
                 // clarity（信頼度）が0以下なのでピッチ検出失敗している
                 // pitch = 0; // 信頼できないので pitchを出力しない
                 Debug.Log("invalid pitch"); // pitch = pitchということ．信頼できないので 現状のpitchから変わってないとする
@@ -86,7 +89,9 @@ public class MovingController : MonoBehaviour
             scale = toneHeights.Hz2Scale((float)pitch);
             Debug.Log($"Pitch: {pitch}, Scale: {scale}");
             Debug.Log($"Clarity: {clarity}");
-        }else{
+        }
+        else
+        {
             scale = 0.0f; // 音量が小さいときなので，キャラを透明にしてもいいかも
         }
         Vector3 pos = tr.position;
