@@ -14,6 +14,7 @@ public class MovingController : MonoBehaviour
     private float[] waveSpectrum;
     private float[] waveData;
     private float[] AMDF;
+    private float[] CMND;
     [SerializeField, Range(10, 300)] private float m_AmpGain = 100;
     // - Const
     private const int SAMPLE_RATE = 44100;
@@ -24,6 +25,7 @@ public class MovingController : MonoBehaviour
 
     private int count;
     private float scale;
+    private float chroma;
     private float pitch;
 
     private Transform tr;
@@ -51,7 +53,7 @@ public class MovingController : MonoBehaviour
 
     }
 
-    void FixedUpdate()
+    void Update()
     {
         if (!m_MicAudioSource.isPlaying)
             return;
@@ -62,43 +64,39 @@ public class MovingController : MonoBehaviour
         float audioLevel = waveData.Average(Mathf.Abs);
 
         float Level = m_AmpGain * audioLevel;
+        Vector3 pos = tr.position;
+
         if (Level > 0.7f) // 音量が0.7より大きければscale計算
         {
-
+            Debug.Log(LenFFT);
             AMDF = new float[LenFFT];
+            CMND = new float[LenFFT];
             double[] y = new double[2];
 
             ToneHeights toneHeights = new ToneHeights();
 
             AMDF = toneHeights.getAMDF(waveData, LenFFT);
+            CMND = toneHeights.cmnd(AMDF,LenFFT);
+            File.WriteAllText(@"amdf.txt","");
             for (int i = 0; i < LenFFT; i++)
-                //File.AppendAllText(@"amdf.txt",$"{AMDF[i]}\n");
-                //Debug.Log($"AMDF[{i}]:{AMDF[i]}");
-                y = toneHeights.YIN(AMDF, LenFFT, 0.3);
+                File.AppendAllText(@"amdf.txt",$"{CMND[i]}\n");
+            //Debug.Log($"AMDF[{i}]:{AMDF[i]}");
+            y = toneHeights.YIN(CMND, LenFFT, 0.3);
             double clarity = y[1];
-            if (clarity > 0)
+            if (clarity > 0.0f && y[0] > 0.0f)
             {
                 pitch = SAMPLE_RATE * (float)y[0];
             }
-            else
-            {
-                // clarity（信頼度）が0以下なのでピッチ検出失敗している
-                // pitch = 0; // 信頼できないので pitchを出力しない
-                Debug.Log("invalid pitch"); // pitch = pitchということ．信頼できないので 現状のpitchから変わってないとする
+            if (pitch > 0.0f){
+                scale = toneHeights.Hz2Scale((float)pitch);
+                chroma = toneHeights.Scale2Chroma(scale)[0];
+                Debug.Log($"Pitch: {pitch}, Scale: {scale}, Chroma: {chroma}");
+                Debug.Log($"Clarity: {clarity}");
+                pos.y = (float)chroma; //scaleは音高(A1=1,A#1=2,B1=3,...,B#1=12)
+                pos.x += (float)0.1; //前に進む
+                tr.position = pos; // (x,y) = (scale,count)にキャラ移動
             }
-            scale = toneHeights.Hz2Scale((float)pitch);
-            Debug.Log($"Pitch: {pitch}, Scale: {scale}");
-            Debug.Log($"Clarity: {clarity}");
         }
-        else
-        {
-            scale = 0.0f; // 音量が小さいときなので，キャラを透明にしてもいいかも
-        }
-        Vector3 pos = tr.position;
-        pos.x = (float)0.1 * scale; //scaleは音高(C1=1,C#1=2,D1=3,...,B#1=12,C2=13,...)
-        pos.y = (float)0.1 * count; //countは0.02秒の回数
-        tr.position = pos; // (x,y) = (scale,count)にキャラ移動
-        count++;
     }
 
     private void MicStart(string device)
