@@ -10,7 +10,6 @@ namespace SoundAnalysis{
             double[] ret = new double[2];
             double pitch;
             double clarity;
-            d = cmnd(d,LenFFT);
 
             while(tau < LenFFT-1){
                 //Debug.Log($"d[{tau}]:{d[tau]}, {d[tau+1]}");
@@ -33,11 +32,11 @@ namespace SoundAnalysis{
 
         public float[] cmnd(float[] diff, int LenFFT)
         {
-            diff[0] = 1;
-            float sum_value = 0;
+            diff[0] = 1.0f;
+            float sum_value = 0.0f;
             for(int tau=1;tau<LenFFT;tau++){
                 sum_value += diff[tau];
-                diff[tau] /= sum_value / tau;
+                diff[tau] /= (sum_value / tau);
             }
             return diff;
         }
@@ -64,6 +63,20 @@ namespace SoundAnalysis{
         {
             if(Hz == 0) return 0.0f;
             else return (12.0f * Mathf.Log(Hz / 110.0f) / Mathf.Log(2.0f));
+        }
+
+        public int[] Scale2Chroma(float scale)
+        {
+            int[] ret = new int[2];
+            while(scale < 0.0f) scale += 12.0f;
+            int scaleI = (int)scale;
+            if(scale - scaleI >  0.5) scaleI ++;
+            else if(scale - scaleI == 0.5) scaleI = (scaleI % 2 == 0)? scaleI : scaleI++;
+
+            ret[0] = scaleI % 12; // chroma
+            ret[1] = scaleI / 12; // octave
+
+            return ret;
         }
     }
 
