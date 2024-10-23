@@ -7,9 +7,9 @@ using System.IO;
 
 public class AstronautMovement : MonoBehaviour
 {
-    public float moveSpeed = 2.0f; // ‰E‚Ö‚ÌˆÚ“®‘¬“x
-    public float floatAmplitude = 0.5f; // ã‰º‚ÌU•
-    public float floatFrequency = 1.0f; // ã‰º‚Ìü”g”
+    public float moveSpeed = 2.0f; // ï¿½Eï¿½Ö‚ÌˆÚ“ï¿½ï¿½ï¿½ï¿½x
+    public float floatAmplitude = 0.5f; // ï¿½ã‰ºï¿½ÌUï¿½ï¿½
+    public float floatFrequency = 1.0f; // ï¿½ã‰ºï¿½Ìï¿½ï¿½gï¿½ï¿½
 
     private Vector3 startPosition;
 
@@ -26,7 +26,7 @@ public class AstronautMovement : MonoBehaviour
     private const int SAMPLE_RATE = 44100;
     private const float BUFFER_TIME = 0.05f;
 
-    //  LenFFT: Fs*LenFrame‚ğ2‚Ì‚×‚«æ‚ÉŠÛ‚ß‚½“_”
+    //  LenFFT: Fs*LenFrameï¿½ï¿½2ï¿½Ì‚×‚ï¿½ï¿½ï¿½ÉŠÛ‚ß‚ï¿½ï¿½_ï¿½ï¿½
     private int LenFFT = (int)Mathf.Pow(2.0f, Mathf.FloorToInt(Mathf.Log(SAMPLE_RATE * BUFFER_TIME) / Mathf.Log(2.0f)));
 
     private int count;
@@ -37,7 +37,7 @@ public class AstronautMovement : MonoBehaviour
     private Transform tr;
     private void Awake()
     {
-        // ‰¹Œ¹ƒnƒ“ƒhƒ‰
+        // ï¿½ï¿½ï¿½ï¿½ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½
         m_MicAudioSource = GetComponent<AudioSource>();
     }
 
@@ -84,7 +84,7 @@ public class AstronautMovement : MonoBehaviour
         float Level = m_AmpGain * audioLevel;
         Vector3 pos = tr.position;
 
-        if (Level > 0.7f) // ‰¹—Ê‚ª0.7‚æ‚è‘å‚«‚¯‚ê‚ÎscaleŒvZ
+        if (Level > 0.7f) // ï¿½ï¿½ï¿½Ê‚ï¿½0.7ï¿½ï¿½ï¿½å‚«ï¿½ï¿½ï¿½ï¿½ï¿½scaleï¿½vï¿½Z
         {
             Debug.Log(LenFFT);
             AMDF = new float[LenFFT];
@@ -95,9 +95,11 @@ public class AstronautMovement : MonoBehaviour
 
             AMDF = toneHeights.getAMDF(waveData, LenFFT);
             CMND = toneHeights.cmnd(AMDF, LenFFT);
+            #if DEBUG
             File.WriteAllText(@"amdf.txt", "");
             for (int i = 0; i < LenFFT; i++)
                 File.AppendAllText(@"amdf.txt", $"{CMND[i]}\n");
+            #endif
             //Debug.Log($"AMDF[{i}]:{AMDF[i]}");
             y = toneHeights.YIN(CMND, LenFFT, 0.3);
             double clarity = y[1];
@@ -109,11 +111,13 @@ public class AstronautMovement : MonoBehaviour
             {
                 scale = toneHeights.Hz2Scale((float)pitch);
                 chroma = toneHeights.Scale2Chroma(scale)[0];
+                #if DEBUG
                 Debug.Log($"Pitch: {pitch}, Scale: {scale}, Chroma: {chroma}");
                 Debug.Log($"Clarity: {clarity}");
-                pos.y = (float)chroma; //scale‚Í‰¹‚(A1=1,A#1=2,B1=3,...,B#1=12)
-                pos.x += (float)0.1; //‘O‚Éi‚Ş
-                tr.position = pos; // (x,y) = (scale,count)‚ÉƒLƒƒƒ‰ˆÚ“®
+                #endif
+                pos.y = (float)chroma; //scaleï¿½Í‰ï¿½ï¿½ï¿½(A1=1,A#1=2,B1=3,...,B#1=12)
+                pos.x += (float)0.1; //ï¿½Oï¿½Éiï¿½ï¿½
+                tr.position = pos; // (x,y) = (scale,count)ï¿½ÉƒLï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½
             }
         }
 
@@ -123,12 +127,12 @@ public class AstronautMovement : MonoBehaviour
     private void MicStart(string device)
     {
         if (device.Equals(""))
-            device = Microphone.devices[0]; //ƒ}ƒCƒN‚ªw’è‚³‚ê‚Ä‚¢‚È‚¯‚ê‚ÎAƒVƒXƒeƒ€‚ğŠ„‚è“–‚Ä‚é
+            device = Microphone.devices[0]; //ï¿½}ï¿½Cï¿½Nï¿½ï¿½ï¿½wï¿½è‚³ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½ÎAï¿½Vï¿½Xï¿½eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è“–ï¿½Ä‚ï¿½
 
         m_MicAudioSource.clip = Microphone.Start(device, true, 1, SAMPLE_RATE);
 
         m_MicAudioSource.loop = true;
-        //ƒ}ƒCƒNƒfƒoƒCƒX‚Ì€”õ‚ª‚Å‚«‚é‚Ü‚Å‘Ò‚Â
+        //ï¿½}ï¿½Cï¿½Nï¿½fï¿½oï¿½Cï¿½Xï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½Ü‚Å‘Ò‚ï¿½
         while (!(Microphone.GetPosition("") > 0)) { }
 
         m_MicAudioSource.Play();
