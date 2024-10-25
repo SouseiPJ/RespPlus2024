@@ -72,16 +72,16 @@ namespace SoundAnalysis
             else return (12.0f * Mathf.Log(Hz / 110.0f) / Mathf.Log(2.0f));
         }
 
-        public int[] Scale2Chroma(float scale)
+        public float[] Scale2Chroma(float scale)
         {
-            int[] ret = new int[2];
+            float[] ret = new float[2];
             while (scale < 0.0f) scale += 12.0f;
-            int scaleI = (int)scale;
-            if (scale - scaleI > 0.5) scaleI++;
-            else if (scale - scaleI == 0.5) scaleI = (scaleI % 2 == 0) ? scaleI : scaleI++;
+           // int scaleI = (int)scale;
+           // if (scale - scaleI > 0.5) scaleI++;
+           // else if (scale - scaleI == 0.5) scaleI = (scaleI % 2 == 0) ? scaleI : scaleI++;
 
-            ret[0] = scaleI % 12; // chroma
-            ret[1] = scaleI / 12; // octave
+            ret[0] = scale % 12; // chroma
+            ret[1] = scale / 12; // octave
 
             return ret;
         }

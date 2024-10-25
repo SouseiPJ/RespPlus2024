@@ -1,17 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Linq;
 using SoundAnalysis;
 using System.IO;
 
 public class AstronautMovement : MonoBehaviour
 {
-    public float moveSpeed = 2.0f; // ï¿½Eï¿½Ö‚ÌˆÚ“ï¿½ï¿½ï¿½ï¿½x
-    public float floatAmplitude = 0.5f; // ï¿½ã‰ºï¿½ÌUï¿½ï¿½
-    public float floatFrequency = 1.0f; // ï¿½ã‰ºï¿½Ìï¿½ï¿½gï¿½ï¿½
+    public int totalStars = 14;  // ¯‚Ì‡Œv”
+    private int collectedStars = 0;  // Šl“¾‚µ‚½¯‚Ì”
 
-    private Vector3 startPosition;
+    public Text scoreText;  // UI‚ÌƒXƒRƒA•\¦—p
+    
+
+                            //public float moveSpeed = 2f; // ‰E‚Ö‚ÌˆÚ“®‘¬“x
+                            // public float floatAmplitude = 0.5f; // ã‰º‚ÌU•
+                            //public float floatFrequency = 1.0f; // ã‰º‚Ìü”g”
+
+    // private Vector3 startPosition;
 
 
 
@@ -24,9 +32,9 @@ public class AstronautMovement : MonoBehaviour
     [SerializeField, Range(10, 300)] private float m_AmpGain = 100;
     // - Const
     private const int SAMPLE_RATE = 44100;
-    private const float BUFFER_TIME = 0.05f;
+    private const float BUFFER_TIME = 0.01f;
 
-    //  LenFFT: Fs*LenFrameï¿½ï¿½2ï¿½Ì‚×‚ï¿½ï¿½ï¿½ÉŠÛ‚ß‚ï¿½ï¿½_ï¿½ï¿½
+    //  LenFFT: Fs*LenFrame‚ğ2‚Ì‚×‚«æ‚ÉŠÛ‚ß‚½“_”
     private int LenFFT = (int)Mathf.Pow(2.0f, Mathf.FloorToInt(Mathf.Log(SAMPLE_RATE * BUFFER_TIME) / Mathf.Log(2.0f)));
 
     private int count;
@@ -37,7 +45,7 @@ public class AstronautMovement : MonoBehaviour
     private Transform tr;
     private void Awake()
     {
-        // ï¿½ï¿½ï¿½ï¿½ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½
+        // ‰¹Œ¹ƒnƒ“ƒhƒ‰
         m_MicAudioSource = GetComponent<AudioSource>();
     }
 
@@ -48,7 +56,10 @@ public class AstronautMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        startPosition = transform.position;
+        // ƒXƒRƒA‚Ì•\¦‚ğXV
+        scoreText.text = "Stars: " + collectedStars + "/" + totalStars;
+
+        //startPosition = transform.position;
 
 
 
@@ -70,9 +81,21 @@ public class AstronautMovement : MonoBehaviour
 
     }
 
+    
+
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
+        // ‰F’ˆ”òsm‚ğ‰E‚ÉˆÚ“®‚³‚¹‚é
+       //transform.position += Vector3.right * moveSpeed * Time.deltaTime;
+
+        // –³d—ÍŠ´‚ğo‚·‚½‚ß‚Éã‰º‚É—h‚ê‚é
+       //float newY = startPosition.y + Mathf.Sin(Time.time * floatFrequency) * floatAmplitude;
+      // transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+
+
+
+
         if (!m_MicAudioSource.isPlaying)
             return;
 
@@ -84,7 +107,7 @@ public class AstronautMovement : MonoBehaviour
         float Level = m_AmpGain * audioLevel;
         Vector3 pos = tr.position;
 
-        if (Level > 0.7f) // ï¿½ï¿½ï¿½Ê‚ï¿½0.7ï¿½ï¿½ï¿½å‚«ï¿½ï¿½ï¿½ï¿½ï¿½scaleï¿½vï¿½Z
+        if (Level > 0.7f) // ‰¹—Ê‚ª0.7‚æ‚è‘å‚«‚¯‚ê‚ÎscaleŒvZ
         {
             Debug.Log(LenFFT);
             AMDF = new float[LenFFT];
@@ -95,11 +118,9 @@ public class AstronautMovement : MonoBehaviour
 
             AMDF = toneHeights.getAMDF(waveData, LenFFT);
             CMND = toneHeights.cmnd(AMDF, LenFFT);
-            #if DEBUG
             File.WriteAllText(@"amdf.txt", "");
             for (int i = 0; i < LenFFT; i++)
                 File.AppendAllText(@"amdf.txt", $"{CMND[i]}\n");
-            #endif
             //Debug.Log($"AMDF[{i}]:{AMDF[i]}");
             y = toneHeights.YIN(CMND, LenFFT, 0.3);
             double clarity = y[1];
@@ -111,13 +132,11 @@ public class AstronautMovement : MonoBehaviour
             {
                 scale = toneHeights.Hz2Scale((float)pitch);
                 chroma = toneHeights.Scale2Chroma(scale)[0];
-                #if DEBUG
                 Debug.Log($"Pitch: {pitch}, Scale: {scale}, Chroma: {chroma}");
                 Debug.Log($"Clarity: {clarity}");
-                #endif
-                pos.y = (float)chroma; //scaleï¿½Í‰ï¿½ï¿½ï¿½(A1=1,A#1=2,B1=3,...,B#1=12)
-                pos.x += (float)0.1; //ï¿½Oï¿½Éiï¿½ï¿½
-                tr.position = pos; // (x,y) = (scale,count)ï¿½ÉƒLï¿½ï¿½ï¿½ï¿½ï¿½Ú“ï¿½
+                pos.y = (float)chroma; //scale‚Í‰¹‚(A1=1,A#1=2,B1=3,...,B#1=12)
+                pos.x += (float)1.0; //‘O‚Éi‚Ş
+                tr.position = pos; // (x,y) = (scale,count)‚ÉƒLƒƒƒ‰ˆÚ“®
             }
         }
 
@@ -127,16 +146,45 @@ public class AstronautMovement : MonoBehaviour
     private void MicStart(string device)
     {
         if (device.Equals(""))
-            device = Microphone.devices[0]; //ï¿½}ï¿½Cï¿½Nï¿½ï¿½ï¿½wï¿½è‚³ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½ï¿½ï¿½ÎAï¿½Vï¿½Xï¿½eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è“–ï¿½Ä‚ï¿½
+            device = Microphone.devices[0]; //ƒ}ƒCƒN‚ªw’è‚³‚ê‚Ä‚¢‚È‚¯‚ê‚ÎAƒVƒXƒeƒ€‚ğŠ„‚è“–‚Ä‚é
 
         m_MicAudioSource.clip = Microphone.Start(device, true, 1, SAMPLE_RATE);
 
         m_MicAudioSource.loop = true;
-        //ï¿½}ï¿½Cï¿½Nï¿½fï¿½oï¿½Cï¿½Xï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½Ü‚Å‘Ò‚ï¿½
+        //ƒ}ƒCƒNƒfƒoƒCƒX‚Ì€”õ‚ª‚Å‚«‚é‚Ü‚Å‘Ò‚Â
         while (!(Microphone.GetPosition("") > 0)) { }
 
         m_MicAudioSource.Play();
     }
 
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Star")) // ¯‚Ìƒ^ƒO‚ª‚Â‚¢‚½ƒIƒuƒWƒFƒNƒg‚ÉÕ“Ë‚µ‚½‚©‚ğŠm”F
+        {
+            collectedStars++;  // ƒXƒRƒA‚ğ‘‚â‚·
+            Destroy(other.gameObject);  // ¯‚ğÁ‚·
+            UpdateScore();
+        }
+        else if (other.gameObject.CompareTag("Trigger")) // “§–¾ƒLƒ…[ƒu‚ÉÕ“Ë‚µ‚½ê‡
+        {
+            SaveScoreAndLoadResult();  // ƒXƒRƒA‚ğ•Û‘¶‚µAŒ‹‰ÊƒV[ƒ“‚É‘JˆÚ
+        }
+    }
+
+    void UpdateScore()
+    {
+        scoreText.text = "Stars: " + collectedStars + "/" + totalStars;
+    }
+
+    // ƒXƒRƒA‚ğ•Û‘¶‚µ‚ÄŒ‹‰ÊƒV[ƒ“‚É‘JˆÚ‚·‚é
+    void SaveScoreAndLoadResult()
+    {
+        // PlayerPrefs‚ğg‚Á‚ÄƒXƒRƒA‚ğ•Û‘¶
+        PlayerPrefs.SetInt("CollectedStars", collectedStars);
+        PlayerPrefs.SetInt("TotalStars", totalStars);
+
+        // Œ‹‰Ê•\¦—pƒV[ƒ“‚É‘JˆÚ
+        SceneManager.LoadScene("ResultSceneƒ`"); // ƒV[ƒ“–¼‚ğŒ‹‰ÊƒV[ƒ“‚Ì–¼‘O‚É’u‚«Š·‚¦‚Ä‚­‚¾‚³‚¢
+    }
 
 }
