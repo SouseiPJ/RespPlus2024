@@ -27,7 +27,7 @@ public class ResultManager : MonoBehaviour
         }
         else
         {
-            resultText.text = "スコア: " + collectedStars + "/" + totalStars;
+            resultText.text = collectedStars + "/" + totalStars + "ゲット";
         }
     }
 

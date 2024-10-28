@@ -9,6 +9,16 @@ using System.IO;
 
 public class AstronautMovement : MonoBehaviour
 {
+    [System.Serializable]
+    public class Monster
+    {
+        public Text textComponent;  // 各モンスターのテキストコンポーネント
+        public string message;      // モンスターが発言する内容
+    }
+    public List<Monster> monsters;   // モンスターのリスト
+    public float displayDuration = 1.5f; // 表示時間
+
+
     public int totalStars = 14;  // 星の合計数
     private int collectedStars = 0;  // 獲得した星の数
 
@@ -57,7 +67,7 @@ public class AstronautMovement : MonoBehaviour
     void Start()
     {
         // スコアの表示を更新
-        scoreText.text = "Stars: " + collectedStars + "/" + totalStars;
+        scoreText.text = "× " + collectedStars.ToString().PadLeft(2,'0') ;
 
         //startPosition = transform.position;
 
@@ -163,6 +173,7 @@ public class AstronautMovement : MonoBehaviour
         {
             collectedStars++;  // スコアを増やす
             Destroy(other.gameObject);  // 星を消す
+            StartCoroutine(DisplayRandomLikes());
             UpdateScore();
         }
         else if (other.gameObject.CompareTag("Trigger")) // 透明キューブに衝突した場合
@@ -185,6 +196,35 @@ public class AstronautMovement : MonoBehaviour
 
         // 結果表示用シーンに遷移
         SceneManager.LoadScene("ResultSceneチ"); // シーン名を結果シーンの名前に置き換えてください
+    }
+
+    private IEnumerator DisplayRandomLikes()
+    {
+        // 各モンスターごとにランダムで発言を決める
+        foreach (Monster monster in monsters)
+        {
+            // ランダムに発言するかを決める
+            bool shouldSpeak = Random.value > 0.5f; // 50%の確率で発言する
+
+            if (shouldSpeak)
+            {
+                monster.textComponent.text = monster.message;
+                monster.textComponent.enabled = true;
+            }
+            else
+            {
+                monster.textComponent.enabled = false; // 発言しない場合は非表示
+            }
+        }
+
+        // 指定した表示時間分待機
+        yield return new WaitForSeconds(displayDuration);
+
+        // 表示を消す
+        foreach (Monster monster in monsters)
+        {
+            monster.textComponent.enabled = false;
+        }
     }
 
 }
