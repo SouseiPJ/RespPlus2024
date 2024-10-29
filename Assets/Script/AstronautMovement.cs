@@ -7,8 +7,12 @@ using System.Linq;
 using SoundAnalysis;
 using System.IO;
 
+
+
 public class AstronautMovement : MonoBehaviour
 {
+    [SerializeField] ParticleSystem particle;
+
     [System.Serializable]
     public class Monster
     {
@@ -147,6 +151,7 @@ public class AstronautMovement : MonoBehaviour
                 pos.y = (float)chroma; //scale‚Í‰¹‚(A1=1,A#1=2,B1=3,...,B#1=12)
                 pos.x += (float)1.0; //‘O‚Éi‚Ş
                 tr.position = pos; // (x,y) = (scale,count)‚ÉƒLƒƒƒ‰ˆÚ“®
+                particle.Play();
             }
         }
 
