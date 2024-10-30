@@ -26,12 +26,13 @@ public class AstronautMovement : MonoBehaviour
     public int totalStars = 14;  // 星の合計数
     private int collectedStars = 0;  // 獲得した星の数
 
-    public Text scoreText;  // UIのスコア表示用
+    public Text scoreText;
     
 
-                            //public float moveSpeed = 2f; // 右への移動速度
-                            // public float floatAmplitude = 0.5f; // 上下の振幅
-                            //public float floatFrequency = 1.0f; // 上下の周波数
+
+    //public float moveSpeed = 2f; // 右への移動速度
+    // public float floatAmplitude = 0.5f; // 上下の振幅
+    //public float floatFrequency = 1.0f; // 上下の周波数
 
     // private Vector3 startPosition;
 
@@ -57,10 +58,17 @@ public class AstronautMovement : MonoBehaviour
     private float pitch;
 
     private Transform tr;
+
+    
+
+
+
+
     private void Awake()
     {
         // 音源ハンドラ
         m_MicAudioSource = GetComponent<AudioSource>();
+        
     }
 
 
@@ -148,6 +156,7 @@ public class AstronautMovement : MonoBehaviour
                 chroma = toneHeights.Scale2Chroma(scale)[0];
                 Debug.Log($"Pitch: {pitch}, Scale: {scale}, Chroma: {chroma}");
                 Debug.Log($"Clarity: {clarity}");
+                
                 pos.y = (float)chroma; //scaleは音高(A1=1,A#1=2,B1=3,...,B#1=12)
                 pos.x += (float)1.0; //前に進む
                 tr.position = pos; // (x,y) = (scale,count)にキャラ移動
@@ -189,7 +198,8 @@ public class AstronautMovement : MonoBehaviour
 
     void UpdateScore()
     {
-        scoreText.text = "Stars: " + collectedStars + "/" + totalStars;
+       // scoreText.text = "Stars: " + collectedStars + "/" + totalStars;
+        scoreText.text = "× " + collectedStars.ToString().PadLeft(2, '0');
     }
 
     // スコアを保存して結果シーンに遷移する
