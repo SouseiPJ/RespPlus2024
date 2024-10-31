@@ -140,9 +140,9 @@ public class AstronautMovement : MonoBehaviour
 
             AMDF = toneHeights.getAMDF(waveData, LenFFT);
             CMND = toneHeights.cmnd(AMDF, LenFFT);
-            File.WriteAllText(@"amdf.txt", "");
-            for (int i = 0; i < LenFFT; i++)
-                File.AppendAllText(@"amdf.txt", $"{CMND[i]}\n");
+            // File.WriteAllText(@"amdf.txt", "");
+            // for (int i = 0; i < LenFFT; i++)
+            // File.AppendAllText(@"amdf.txt", $"{CMND[i]}\n");
             //Debug.Log($"AMDF[{i}]:{AMDF[i]}");
             y = toneHeights.YIN(CMND, LenFFT, 0.3);
             double clarity = y[1];
