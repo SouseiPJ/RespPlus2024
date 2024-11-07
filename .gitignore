@@ -24,9 +24,6 @@ ExportedObj/
 *.booproj
 *.svd
 
-# Unity meta files
-*.meta
-
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
 
