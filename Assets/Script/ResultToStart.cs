@@ -9,7 +9,7 @@ public class ResultToStart : MonoBehaviour
     public void OnButtonPress()
     {
         // 次のシーンに切り替える。シーン名を次のシーン名に置き換えてください。
-        SceneManager.LoadScene("StartSceneチ");
+        SceneManager.LoadScene("MainScene");
     }
 
 }
